@@ -1,2 +1,7 @@
 .env
 User/.env
+Order/.env
+Product/.env
+Storage/__pycache__/
+Storage/env/
+Storage/img

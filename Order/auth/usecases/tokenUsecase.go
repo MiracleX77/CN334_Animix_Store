@@ -1,15 +1,12 @@
 package usecases
 
 import (
-	"time"
-
-	authError "segmentation/auth/errors"
+	authError "github.com/MiracleX77/CN334_Animix_Store/auth/errors"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
 type TokenUsecase interface {
-	GenerateToken(id *uint, username *string) (*string, error)
 	ParseToken(token *string) (*uint, error)
 }
 
@@ -21,26 +18,6 @@ func NewTokenUsecaseImpl(secretKey string) TokenUsecase {
 	return &tokenUsecaseImpl{
 		secretKey: secretKey,
 	}
-}
-
-func (u *tokenUsecaseImpl) GenerateToken(id *uint, username *string) (*string, error) {
-
-	key := []byte(u.secretKey)
-	// Create the token
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	// Set some claims
-	clams := token.Claims.(jwt.MapClaims)
-	clams["authorized"] = true
-	clams["dentist_id"] = *id
-	clams["username"] = *username
-	clams["exp"] = time.Now().Add(time.Hour * 2).Unix()
-
-	tokenString, err := token.SignedString(key)
-	if err != nil {
-		return nil, err
-	}
-	return &tokenString, nil
 }
 
 func (u *tokenUsecaseImpl) ParseToken(token *string) (*uint, error) {
@@ -59,6 +36,6 @@ func (u *tokenUsecaseImpl) ParseToken(token *string) (*uint, error) {
 	if !ok || !t.Valid {
 		return nil, &authError.TokenNotAuthorizedError{}
 	}
-	dentistID := uint(claims["dentist_id"].(float64))
-	return &dentistID, nil
+	user_id := uint(claims["user_id"].(float64))
+	return &user_id, nil
 }

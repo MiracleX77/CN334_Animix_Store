@@ -1,91 +1,52 @@
 package server
 
 import (
-	authHandler "segmentation/auth/handlers"
-	authUsecase "segmentation/auth/usecases"
+	deliveryHandler "github.com/MiracleX77/CN334_Animix_Store/delivery/handlers"
+	deliveryRepository "github.com/MiracleX77/CN334_Animix_Store/delivery/repositories"
+	deliveryUsecase "github.com/MiracleX77/CN334_Animix_Store/delivery/usecases"
 
-	dentistHandler "segmentation/dentists/handlers"
-	dentistRepository "segmentation/dentists/repositories"
-	dentistUsecase "segmentation/dentists/usecases"
+	paymentHandler "github.com/MiracleX77/CN334_Animix_Store/payment/handlers"
+	paymentRepository "github.com/MiracleX77/CN334_Animix_Store/payment/repositories"
+	paymentUsecase "github.com/MiracleX77/CN334_Animix_Store/payment/usecases"
 
-	patientHandler "segmentation/patient/handlers"
-	patientRepository "segmentation/patient/repositories"
-	patientUsecase "segmentation/patient/usecases"
-
-	SegmentationHandler "segmentation/segmentation/handlers"
-	SegmentationRepository "segmentation/segmentation/repositories"
-	SegmentationUsecase "segmentation/segmentation/usecases"
+	authRepository "github.com/MiracleX77/CN334_Animix_Store/auth/repositories"
 )
 
 func (s *echoServer) initializeRouters() {
-	s.initializeAuthHttpHandler()
-	s.initializeDentistHttpHandler()
-	s.initializePatientHttpHandler()
-	s.initializeSegmentationHttpHandler()
+	s.initializeDeliveryHttpHandler()
+	s.initializePaymentHttpHandler()
 }
 
-func (s *echoServer) initializeAuthHttpHandler() {
-	dentistPosgresRepository := dentistRepository.NewDentistPostgresRepository(s.db)
-	authUsecase := authUsecase.NewAuthUsecaseImpl(dentistPosgresRepository)
-	authHttpHandler := authHandler.NewAuthHttpHandler(authUsecase)
+func (s *echoServer) initializeDeliveryHttpHandler() {
+	deliveryPosgresRepository := deliveryRepository.NewDeliveryPostgresRepository(s.db)
+	deliveryUsecase := deliveryUsecase.NewDeliveryUsecaseImpl(deliveryPosgresRepository)
+	deliveryHandler := deliveryHandler.NewDeliveryHttpHandler(deliveryUsecase)
 
-	authRouters := s.app.Group("v1/auth")
+	deliveryRouters := s.app.Group("v1/delivery")
 
-	authRouters.POST("/register", authHttpHandler.Register)
-	authRouters.POST("/login", authHttpHandler.Login)
-}
+	deliveryRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "user"))
+	deliveryRouters.GET("/:id", deliveryHandler.GetDeliveryById)
 
-func (s *echoServer) initializeDentistHttpHandler() {
-	dentistPosgresRepository := dentistRepository.NewDentistPostgresRepository(s.db)
-	dentistUsecase := dentistUsecase.NewDentistUsecaseImpl(dentistPosgresRepository)
-	dentistHttpHandler := dentistHandler.NewDentistHttpHandler(dentistUsecase)
-
-	dentistRouters := s.app.Group("v1/dentist")
-
-	dentistRouters.Use(TokenAuthentication(dentistPosgresRepository))
-	dentistRouters.PUT("/", dentistHttpHandler.UpdateDentist)
-	dentistRouters.GET("/", dentistHttpHandler.GetDentistById)
-	dentistRouters.GET("/all", dentistHttpHandler.GetDentistAll)
-	dentistRouters.DELETE("/", dentistHttpHandler.DeleteDentist)
-}
-
-func (s *echoServer) initializePatientHttpHandler() {
-	patientPosgresRepository := patientRepository.NewPatientPostgresRepository(s.db)
-	patientUsecase := patientUsecase.NewPatientUsecaseImpl(patientPosgresRepository)
-	patientHttpHandler := patientHandler.NewPatientHttpHandler(patientUsecase)
-
-	patientRouters := s.app.Group("v1/patient")
-
-	patientRouters.Use(TokenAuthentication(dentistRepositoryForAuth(s)))
-	patientRouters.POST("/", patientHttpHandler.CreatePatient)
-	patientRouters.GET("/:id", patientHttpHandler.GetPatientById)
-	patientRouters.GET("/", patientHttpHandler.GetPatientsByDentist)
-	patientRouters.DELETE("/:id", patientHttpHandler.DeletePatient)
-	patientRouters.PUT("/:id", patientHttpHandler.UpdatePatient)
-}
-func (s *echoServer) initializeSegmentationHttpHandler() {
-	//imagePosgresRepository := SegmentationRepository.NewImagePostgresRepository(s.db)
-	resultPosgresRepository := SegmentationRepository.NewResultPostgresRepository(s.db)
-	bitewingPosgresRepository := SegmentationRepository.NewBitewingPostgresRepository(s.db)
-	toothPosgresRepository := SegmentationRepository.NewToothPostgresRepository(s.db)
-
-	resultUsecase := SegmentationUsecase.NewResultUsecaseImpl(
-		resultPosgresRepository,
-		bitewingPosgresRepository,
-		toothPosgresRepository)
-
-	segmentationHttpHandler := SegmentationHandler.NewSegmentationHttpHandler(resultUsecase)
-
-	segmentationRouters := s.app.Group("v1/segmentation")
-
-	segmentationRouters.Use(TokenAuthentication(dentistRepositoryForAuth(s)))
-	segmentationRouters.PUT("/:id", segmentationHttpHandler.SaveResult)
-	segmentationRouters.GET("/", segmentationHttpHandler.GetResults)
-	segmentationRouters.GET("/:id", segmentationHttpHandler.GetDetailResult)
-	segmentationRouters.DELETE("/:id", segmentationHttpHandler.DeleteResult)
+	adminRouters := s.app.Group("v1/delivery")
+	adminRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "admin"))
+	adminRouters.GET("/", deliveryHandler.GetDeliveryAll)
+	adminRouters.PUT("/:id", deliveryHandler.UpdateDelivery)
+	adminRouters.DELETE("/:id", deliveryHandler.DeleteDelivery)
 
 }
 
-func dentistRepositoryForAuth(s *echoServer) dentistRepository.DentistRepository {
-	return dentistRepository.NewDentistPostgresRepository(s.db)
+func (s *echoServer) initializePaymentHttpHandler() {
+	paymentPosgresRepository := paymentRepository.NewPaymentPostgresRepository(s.db)
+	paymentUsecase := paymentUsecase.NewPaymentUsecaseImpl(paymentPosgresRepository)
+	paymentHandler := paymentHandler.NewPaymentHttpHandler(paymentUsecase)
+
+	paymentRouters := s.app.Group("v1/payment")
+
+	paymentRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "user"))
+	paymentRouters.GET("/:id", paymentHandler.GetPaymentById)
+
+}
+
+func authRepositoryForAuth(s *echoServer) authRepository.UserRepository {
+	return authRepository.NewUserPostgresRepository(s.db)
 }

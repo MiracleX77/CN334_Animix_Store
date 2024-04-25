@@ -27,7 +27,7 @@ func NewEchoServer(cfg *configs.Config, db *gorm.DB) Server {
 
 func (s *echoServer) Start() {
 	// initialize routers here
-	//s.initializeRouters()
+	s.initializeRouters()
 	s.app.Validator = NewCustomValidator()
 	s.app.Use(middleware.Logger())
 	serverUrl := fmt.Sprintf(":%d", s.cfg.App.Port)

@@ -2,11 +2,12 @@ package usecases
 
 import (
 	"errors"
-	authError "segmentation/auth/errors"
-	"segmentation/auth/models"
-	"segmentation/configs"
-	"segmentation/dentists/entities"
-	"segmentation/dentists/repositories"
+
+	authError "github.com/MiracleX77/CN334_Animix_Store/auth/errors"
+	"github.com/MiracleX77/CN334_Animix_Store/auth/models"
+	"github.com/MiracleX77/CN334_Animix_Store/configs"
+	"github.com/MiracleX77/CN334_Animix_Store/user/entities"
+	"github.com/MiracleX77/CN334_Animix_Store/user/repositories"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,12 +19,12 @@ type AuthUsecase interface {
 }
 
 type authUsecaseImpl struct {
-	dentistRepository repositories.DentistRepository
+	userRepository repositories.UserRepository
 }
 
-func NewAuthUsecaseImpl(dentistRepository repositories.DentistRepository) AuthUsecase {
+func NewAuthUsecaseImpl(userRepository repositories.UserRepository) AuthUsecase {
 	return &authUsecaseImpl{
-		dentistRepository: dentistRepository,
+		userRepository: userRepository,
 	}
 }
 func (u *authUsecaseImpl) CheckData(in *models.RegisterData) error {
@@ -31,7 +32,7 @@ func (u *authUsecaseImpl) CheckData(in *models.RegisterData) error {
 	//result = true -> found username
 	//result = false -> Not found username
 	//err != nill -> Found error
-	if result, err := u.dentistRepository.Search("username", username); result || err != nil {
+	if result, err := u.userRepository.Search("username", username); result || err != nil {
 		return &authError.UsernameAlreadyExistError{}
 	} else {
 		if errors.Is(err, &authError.ServerInternalError{}) {
@@ -46,15 +47,17 @@ func (u *authUsecaseImpl) RegisterDataProcessing(in *models.RegisterData) error 
 	if err != nil {
 		return &authError.ServerInternalError{Err: err}
 	}
-	insertDentistData := &entities.InsertDentist{
+	insertUserData := &entities.InsertUser{
 		FirstName: in.FirstName,
 		LastName:  in.LastName,
+		Email:     in.Email,
 		Username:  in.Username,
 		Password:  string(hashedPassword),
+		Type:      "User",
 		Status:    "Active",
 	}
 
-	if err := u.dentistRepository.InsertDentistData(insertDentistData); err != nil {
+	if err := u.userRepository.InsertUserData(insertUserData); err != nil {
 		return &authError.ServerInternalError{Err: err}
 	}
 
@@ -67,24 +70,24 @@ func (u *authUsecaseImpl) LoginDataProcession(in *models.LoginData) (*string, er
 	//result = true -> found username
 	//result = false -> Not found username
 	//err != nill -> Found error
-	if result, err := u.dentistRepository.Search("username", username); !result || err != nil {
+	if result, err := u.userRepository.Search("username", username); !result || err != nil {
 		if err != nil {
 			return nil, &authError.ServerInternalError{Err: err}
 		}
 		return nil, &authError.UsernameNotFoundError{}
 	}
-	if dentist, err := u.dentistRepository.GetDentistDataByKey("username", username); err != nil {
+	if user, err := u.userRepository.GetUserDataByKey("username", username); err != nil {
 		//return error
 		return nil, &authError.ServerInternalError{Err: err}
 	} else {
 		//compare password
-		if err := bcrypt.CompareHashAndPassword([]byte(dentist.Password), []byte(*password)); err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(*password)); err != nil {
 			return nil, &authError.PasswordIncorrectError{}
 		} else {
 			//return success
 			//generate token
 			tokenUsecase := NewTokenUsecaseImpl(configs.GetJwtConfig().SecretKey)
-			token, err := tokenUsecase.GenerateToken(&dentist.ID, &dentist.Username)
+			token, err := tokenUsecase.GenerateToken(&user.ID, &user.Username, &user.Type)
 			if err != nil {
 				return nil, &authError.ServerInternalError{Err: err}
 			}

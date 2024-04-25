@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"segmentation/configs"
 	"time"
+
+	"github.com/MiracleX77/CN334_Animix_Store/configs"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

@@ -1,40 +1,49 @@
 package server
 
-// import (
-// 	"net/http"
-// 	tokenUsecase "segmentation/auth/usecases"
-// 	"segmentation/configs"
-// 	"strconv"
+import (
+	"net/http"
+	"strconv"
 
-// 	"github.com/labstack/echo/v4"
-// )
+	tokenUsecase "github.com/MiracleX77/CN334_Animix_Store/auth/usecases"
+	"github.com/MiracleX77/CN334_Animix_Store/configs"
+	userRepository "github.com/MiracleX77/CN334_Animix_Store/user/repositories"
 
-// func TokenAuthentication(repo dentistRepository.DentistRepository) echo.MiddlewareFunc {
-// 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-// 		return func(c echo.Context) error {
-// 			authHeader := c.Request().Header.Get("Authorization")
-// 			if authHeader == "" {
-// 				return c.JSON(http.StatusUnauthorized, "missing authorization header")
-// 			}
-// 			// check if token not start with Bearer
-// 			if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-// 				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
-// 			} else {
-// 				authHeader = authHeader[7:]
-// 			}
+	"github.com/labstack/echo/v4"
+)
 
-// 			tokenUsecase := tokenUsecase.NewTokenUsecaseImpl(configs.GetJwtConfig().SecretKey)
-// 			userID, err := tokenUsecase.ParseToken(&authHeader)
-// 			if err != nil {
-// 				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
-// 			}
-// 			dentistId := strconv.FormatUint(uint64(*userID), 10)
-// 			if result, err := repo.Search("id", &dentistId); !result || err != nil {
-// 				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
-// 			}
-// 			c.Set("dentistId", dentistId)
+func TokenAuthentication(repo userRepository.UserRepository, typeUser string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader == "" {
+				return c.JSON(http.StatusUnauthorized, "missing authorization header")
+			}
+			// check if token not start with Bearer
+			if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
+				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+			} else {
+				authHeader = authHeader[7:]
+			}
 
-// 			return next(c)
-// 		}
-// 	}
-// }
+			tokenUsecase := tokenUsecase.NewTokenUsecaseImpl(configs.GetJwtConfig().SecretKey)
+			userID, err := tokenUsecase.ParseToken(&authHeader)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+			}
+			userId := strconv.FormatUint(uint64(*userID), 10)
+			result, err := repo.GetUserDataByKey("id", &userId)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+			}
+			if typeUser == "admin" {
+				if result.Type != "Admin" {
+					return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+				}
+			}
+
+			c.Set("userId", userId)
+			c.Set("token", authHeader)
+			return next(c)
+		}
+	}
+}

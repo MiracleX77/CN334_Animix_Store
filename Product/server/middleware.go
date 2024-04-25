@@ -2,15 +2,16 @@ package server
 
 import (
 	"net/http"
-	tokenUsecase "segmentation/auth/usecases"
-	"segmentation/configs"
-	dentistRepository "segmentation/dentists/repositories"
 	"strconv"
+
+	userRepository "github.com/MiracleX77/CN334_Animix_Store/auth/repositories"
+	tokenUsecase "github.com/MiracleX77/CN334_Animix_Store/auth/usecases"
+	"github.com/MiracleX77/CN334_Animix_Store/configs"
 
 	"github.com/labstack/echo/v4"
 )
 
-func TokenAuthentication(repo dentistRepository.DentistRepository) echo.MiddlewareFunc {
+func TokenAuthentication(repo userRepository.UserRepository, typeUser string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
@@ -29,12 +30,19 @@ func TokenAuthentication(repo dentistRepository.DentistRepository) echo.Middlewa
 			if err != nil {
 				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
 			}
-			dentistId := strconv.FormatUint(uint64(*userID), 10)
-			if result, err := repo.Search("id", &dentistId); !result || err != nil {
+			userId := strconv.FormatUint(uint64(*userID), 10)
+			result, err := repo.GetUserDataByKey("id", &userId)
+			if err != nil {
 				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
 			}
-			c.Set("dentistId", dentistId)
+			if typeUser == "admin" {
+				if result.Type != "Admin" {
+					return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+				}
+			}
 
+			c.Set("userId", userId)
+			c.Set("token", authHeader)
 			return next(c)
 		}
 	}

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"segmentation/configs"
-	"segmentation/database"
-	"segmentation/server"
+	"github.com/MiracleX77/CN334_Animix_Store/configs"
+	"github.com/MiracleX77/CN334_Animix_Store/database"
+	"github.com/MiracleX77/CN334_Animix_Store/server"
 )
 
 func main() {

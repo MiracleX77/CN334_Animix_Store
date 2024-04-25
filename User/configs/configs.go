@@ -34,7 +34,8 @@ type (
 // The `init` function in Go initializes Viper to read configuration settings from a .env file in
 // KEY=VALUE format and automatically load environment variables.
 func init() {
-	viper.SetConfigFile(".env")
+
+	viper.SetConfigFile("D:/Documents/Github/CN334_Animix_Store/user/.env")
 	viper.SetConfigType("env") // If your .env file has KEY=VALUE format
 	err := viper.ReadInConfig()
 	if err != nil {

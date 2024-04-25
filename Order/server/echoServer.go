@@ -2,7 +2,8 @@ package server
 
 import (
 	"fmt"
-	"segmentation/configs"
+
+	"github.com/MiracleX77/CN334_Animix_Store/configs"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
