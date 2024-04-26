@@ -59,7 +59,7 @@ func (r *orderPosgresRepository) GetDataAllByKey(key string, value *string) ([]*
 	return datas, nil
 }
 
-func (r *orderPosgresRepository) InsertData(in *entities.InsertOrder) error {
+func (r *orderPosgresRepository) InsertData(in *entities.InsertOrder) (int64, error) {
 	data := &entities.Order{
 		UserId:     in.UserId,
 		DeliveryId: in.DeliveryId,
@@ -72,19 +72,15 @@ func (r *orderPosgresRepository) InsertData(in *entities.InsertOrder) error {
 
 	if result.Error != nil {
 		log.Errorf("InsertData:%v", result.Error)
-		return &orderError.ServerInternalError{Err: result.Error}
+		return 0, &orderError.ServerInternalError{Err: result.Error}
 	}
 	log.Debugf("InsertData: %v", result.RowsAffected)
-	return nil
+	return int64(data.ID), nil
 }
 
 func (r *orderPosgresRepository) UpdateData(in *entities.UpdateOrder, id *uint64) error {
 	result := r.db.Model(&entities.Order{}).Where("id = ?", *id).Updates(map[string]interface{}{
-		"user_id":     in.UserId,
-		"delivery_id": in.DeliveryId,
-		"payment_id":  in.PaymentId,
-		"total_price": in.TotalPrice,
-		"status":      in.Status,
+		"status": in.Status,
 	})
 	if result.Error != nil {
 		log.Errorf("UpdateData:%v", result.Error)

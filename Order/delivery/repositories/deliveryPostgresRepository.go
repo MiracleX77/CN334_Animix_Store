@@ -62,7 +62,7 @@ func (r *deliveryPosgresRepository) GetDataAllByKey(key string, value *string) (
 func (r *deliveryPosgresRepository) InsertData(in *entities.InsertDelivery) (int64, error) {
 	data := &entities.Delivery{
 		AddressId: in.AddressId,
-		Status:    "Active",
+		Status:    in.Status,
 	}
 
 	result := r.db.Create(data)
@@ -72,7 +72,7 @@ func (r *deliveryPosgresRepository) InsertData(in *entities.InsertDelivery) (int
 		return 0, &deliveryError.ServerInternalError{Err: result.Error}
 	}
 	log.Debugf("InsertData: %v", result.RowsAffected)
-	return result.RowsAffected, nil
+	return int64(data.ID), nil
 }
 
 func (r *deliveryPosgresRepository) UpdateData(in *entities.UpdateDelivery, id *uint64) error {

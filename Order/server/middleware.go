@@ -36,7 +36,7 @@ func TokenAuthentication(repo userRepository.UserRepository, typeUser string) ec
 				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
 			}
 			if typeUser == "admin" {
-				if result.Type != "admin" {
+				if result.Type != "Admin" {
 					return c.JSON(http.StatusUnauthorized, "invalid or expired token")
 				}
 			}

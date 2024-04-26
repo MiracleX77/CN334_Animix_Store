@@ -27,10 +27,6 @@ type (
 	}
 
 	UpdateOrder struct {
-		UserId     int     `json:"user_id"`
-		DeliveryId int     `json:"delivery_id"`
-		PaymentId  int     `json:"payment_id"`
-		TotalPrice float64 `json:"total_price"`
-		Status     string  `json:"status"`
+		Status string `json:"status"`
 	}
 )

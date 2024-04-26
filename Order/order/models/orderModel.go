@@ -7,21 +7,20 @@ import (
 	paymentModel "github.com/MiracleX77/CN334_Animix_Store/payment/models"
 )
 
+type ListProductId struct {
+	ListProductId []uint64 `form:"list_product_id[]"`
+}
 type InsertOrderModel struct {
 	UserId        uint64   `json:"user" validate:"required"`
 	AddressId     uint64   `json:"address_id" validate:"required"`
-	ListProductId []uint64 `json:"list_product_id" validate:"required"`
+	ListProductId []uint64 `form:"list_product_id[]" json:"list_product_id" validate:"required"`
 	Type          string   `json:"type" validate:"required"`
 	Img           string   `json:"img" validate:"required"`
 	Total         float64  `json:"total" validate:"required"`
 }
 
 type UpdateOrderModel struct {
-	AddressId     uint64   `json:"address_id" validate:"required"`
-	ListProductId []uint64 `json:"list_product_id" validate:"required"`
-	Type          string   `json:"type" validate:"required"`
-	Img           string   `json:"img" validate:"required"`
-	Total         float64  `json:"total" validate:"required"`
+	Status string `json:"status"`
 }
 
 type OrderModel struct {

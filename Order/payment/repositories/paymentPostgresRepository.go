@@ -45,7 +45,7 @@ func (r *paymentPosgresRepository) InsertData(in *entities.InsertPayment) (int64
 		Type:         in.Type,
 		Total:        in.Total,
 		ProofPayment: in.ProofPayment,
-		Status:       "Active",
+		Status:       in.Status,
 	}
 
 	result := r.db.Create(data)
@@ -55,5 +55,5 @@ func (r *paymentPosgresRepository) InsertData(in *entities.InsertPayment) (int64
 		return 0, &paymentError.ServerInternalError{Err: result.Error}
 	}
 	log.Debugf("InsertData: %v", result.RowsAffected)
-	return result.RowsAffected, nil
+	return int64(data.ID), nil
 }

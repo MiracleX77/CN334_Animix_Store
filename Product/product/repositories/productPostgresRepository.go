@@ -38,8 +38,6 @@ func (r *productPosgresRepository) GetDataByKey(key string, value *string) (*ent
 	if key == "name" && value != nil {
 		key = key + " LIKE ?"
 		*value = "%" + *value + "%" // This modifies the search term to be a wildcard search
-	} else if value != nil {
-		key = key + " = ?"
 	}
 	data_e := r.db.Preload("Author").Preload("Publisher").Preload("Category").Where(key+"= ?", *value).Where("status <> ?", "Removed").First(data)
 	if data_e.Error != nil {

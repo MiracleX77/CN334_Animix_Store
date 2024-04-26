@@ -1,6 +1,11 @@
 package usecases
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"strconv"
 
 	"github.com/MiracleX77/CN334_Animix_Store/order/entities"
@@ -10,34 +15,40 @@ import (
 
 	deliveryRepository "github.com/MiracleX77/CN334_Animix_Store/delivery/repositories"
 	paymentRepository "github.com/MiracleX77/CN334_Animix_Store/payment/repositories"
+	transactionRepository "github.com/MiracleX77/CN334_Animix_Store/transaction/repositories"
 
 	deliveryModels "github.com/MiracleX77/CN334_Animix_Store/delivery/models"
 	paymentModels "github.com/MiracleX77/CN334_Animix_Store/payment/models"
 
 	deliveryEntities "github.com/MiracleX77/CN334_Animix_Store/delivery/entities"
 	paymentEntities "github.com/MiracleX77/CN334_Animix_Store/payment/entities"
+	transactionEntities "github.com/MiracleX77/CN334_Animix_Store/transaction/entities"
 )
 
 type OrderUsecase interface {
 	InsertOrder(in *models.InsertOrderModel) error
 	GetOrderById(id *string, token *string) (*models.OrderModel, error)
-	UpdateOrder(in *models.UpdateOrderModel, id *string) error
+	UpdateStatusOrder(in *models.UpdateOrderModel, id *string) error
 	CheckOrderId(id *string) error
-	GetOrderAll(token *string) ([]*models.OrderModel, error)
+	GetOrderAll() ([]*models.ListOrderModel, error)
+	GetOrderByKey(key string, value string) ([]*models.ListOrderModel, error)
 	DeleteOrder(id *string) error
+	SendFileToApi(file io.Reader, filename string) error
 }
 
 type orderUsecaseImpl struct {
-	orderRepository    repositories.OrderRepository
-	deliveryRepository deliveryRepository.DeliveryRepository
-	paymentRepository  paymentRepository.PaymentRepository
+	orderRepository       repositories.OrderRepository
+	deliveryRepository    deliveryRepository.DeliveryRepository
+	paymentRepository     paymentRepository.PaymentRepository
+	transactionRepository transactionRepository.TransactionRepository
 }
 
-func NewOrderUsecaseImpl(orderRepository repositories.OrderRepository, deliveryRepository deliveryRepository.DeliveryRepository, paymentRepository paymentRepository.PaymentRepository) OrderUsecase {
+func NewOrderUsecaseImpl(orderRepository repositories.OrderRepository, deliveryRepository deliveryRepository.DeliveryRepository, paymentRepository paymentRepository.PaymentRepository, transactionRepository transactionRepository.TransactionRepository) OrderUsecase {
 	return &orderUsecaseImpl{
-		orderRepository:    orderRepository,
-		deliveryRepository: deliveryRepository,
-		paymentRepository:  paymentRepository,
+		orderRepository:       orderRepository,
+		deliveryRepository:    deliveryRepository,
+		paymentRepository:     paymentRepository,
+		transactionRepository: transactionRepository,
 	}
 }
 
@@ -107,8 +118,27 @@ func (u *orderUsecaseImpl) GetOrderById(id *string, token *string) (*models.Orde
 	return orderModel, nil
 }
 
-func (u *orderUsecaseImpl) GetOrderAll(token *string) ([]*models.ListOrderModel, error) {
+func (u *orderUsecaseImpl) GetOrderAll() ([]*models.ListOrderModel, error) {
 	orders, err := u.orderRepository.GetDataAll()
+	if err != nil {
+		return nil, err
+	}
+	orderModels := []*models.ListOrderModel{}
+	for _, order := range orders {
+		orderModel := &models.ListOrderModel{
+			ID:         uint64(order.ID),
+			UserId:     uint64(order.UserId),
+			TotalPrice: order.TotalPrice,
+			CreatedAt:  order.CreatedAt,
+			UpdatedAt:  order.UpdatedAt,
+			Status:     order.Status,
+		}
+		orderModels = append(orderModels, orderModel)
+	}
+	return orderModels, nil
+}
+func (u *orderUsecaseImpl) GetOrderByKey(key string, value string) ([]*models.ListOrderModel, error) {
+	orders, err := u.orderRepository.GetDataAllByKey(key, &value)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +172,8 @@ func (u *orderUsecaseImpl) InsertOrder(in *models.InsertOrderModel) error {
 	paymentModels := &paymentEntities.InsertPayment{
 		Type:         in.Type,
 		Total:        in.Total,
-		ProofPayment: in.Img,
-		Status:       "Active",
+		ProofPayment: "http://127.0.0.1:8000/images/" + in.Img,
+		Status:       "WaitConfirm",
 	}
 	paymentId, err := u.paymentRepository.InsertData(paymentModels)
 	if err != nil {
@@ -154,27 +184,37 @@ func (u *orderUsecaseImpl) InsertOrder(in *models.InsertOrderModel) error {
 		UserId:     int(in.UserId),
 		DeliveryId: int(deliveryId),
 		PaymentId:  int(paymentId),
-		Status:     "Active",
+		TotalPrice: in.Total,
+		Status:     "Pending",
 	}
 
-	if err := u.orderRepository.InsertData(orderInsert); err != nil {
+	orderId, err := u.orderRepository.InsertData(orderInsert)
+	if err != nil {
 		return err
 	}
+
+	for _, productId := range in.ListProductId {
+		transactionModels := &transactionEntities.InsertTransaction{
+			ProductId: int(productId),
+			OrderId:   int(orderId),
+			Status:    "Active",
+		}
+		if _, err := u.transactionRepository.InsertData(transactionModels); err != nil {
+			return err
+		}
+	}
+
 	return nil
 
 }
 
-func (u *orderUsecaseImpl) UpdateOrder(in *models.UpdateOrderModel, id *string) error {
+func (u *orderUsecaseImpl) UpdateStatusOrder(in *models.UpdateOrderModel, id *string) error {
 	idUint64, err := strconv.ParseUint(*id, 10, 64)
 	if err != nil {
 		return &orderError.ServerInternalError{Err: err}
 	}
 	orderUpdate := &entities.UpdateOrder{
-		AddressId:      int(in.AddressId),
-		Cost:           in.Cost,
-		Type:           in.Type,
-		TrackingNumber: in.TrackingNumber,
-		Status:         "Processed",
+		Status: in.Status,
 	}
 	if err := u.orderRepository.UpdateData(orderUpdate, &idUint64); err != nil {
 		return err
@@ -189,6 +229,43 @@ func (u *orderUsecaseImpl) DeleteOrder(id *string) error {
 	}
 	if err := u.orderRepository.DeleteData(&idUint64); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (u *orderUsecaseImpl) SendFileToApi(file io.Reader, filename string) error {
+	url := "http://127.0.0.1:8000/upload" // Endpoint to which you want to send the file
+
+	// Creating a multipart/form-data body
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return err
+	}
+	writer.Close()
+
+	// Create the request
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to upload file, status code: %d", resp.StatusCode)
 	}
 	return nil
 }
