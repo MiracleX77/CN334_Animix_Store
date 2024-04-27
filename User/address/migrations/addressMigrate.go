@@ -14,16 +14,35 @@ import (
 func main() {
 	cfg := configs.GetConfig()
 	db := database.NewPostgresDatabase(&cfg)
-	//addressMigrate(db)
-	//fetchAndSaveDistrict(db)
+	addressMigrate(db)
+	fetchAndSaveProvince(db)
+	fetchAndSaveDistrict(db)
 	fetchAndSaveSubDistrict(db)
 }
 
 func addressMigrate(db database.Database) {
-	db.GetDb().AutoMigrate(&entities.Address{})
 	db.GetDb().AutoMigrate(&entities.Province{})
 	db.GetDb().AutoMigrate(&entities.District{})
 	db.GetDb().AutoMigrate(&entities.SubDistrict{})
+	db.GetDb().AutoMigrate(&entities.Address{})
+
+}
+func fetchAndSaveProvince(db database.Database) {
+	url := "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json" // Replace with the actual API URL
+	//url := "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_amphure.json"
+
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatalf("Error fetching data: %v", err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Println(resp.Body)
+	var provinces []entities.Province
+	if err := json.NewDecoder(resp.Body).Decode(&provinces); err != nil {
+		log.Fatalf("Error decoding JSON: %v", err)
+	}
+	saveProvinces(db, provinces)
 }
 
 func fetchAndSaveDistrict(db database.Database) {
@@ -41,12 +60,7 @@ func fetchAndSaveDistrict(db database.Database) {
 	if err := json.NewDecoder(resp.Body).Decode(&provinces); err != nil {
 		log.Fatalf("Error decoding JSON: %v", err)
 	}
-	// // Optional: log the results to verify
-	// for _, province := range provinces {
-	// 	log.Printf("Read province ID: %d, Name: %s", province.Id, province.NameTh)
-	// }
-
-	saveProvinces(db, provinces)
+	saveDistricts(db, provinces)
 }
 
 func fetchAndSaveSubDistrict(db database.Database) {
@@ -97,7 +111,16 @@ func saveSubDistricts(db database.Database, subDistricts []entities.SubDistrict)
 	log.Println("All sub-districts saved successfully")
 }
 
-func saveProvinces(db database.Database, provinces []entities.District) {
+func saveProvinces(db database.Database, provinces []entities.Province) {
+	for _, province := range provinces {
+		result := db.GetDb().Create(&province)
+		if result.Error != nil {
+			log.Fatalf("Error saving province ID %d to database: %v", province.Id, result.Error)
+		}
+	}
+	log.Println("All provinces saved successfully")
+}
+func saveDistricts(db database.Database, provinces []entities.District) {
 	for _, province := range provinces {
 		result := db.GetDb().Create(&province)
 		if result.Error != nil {

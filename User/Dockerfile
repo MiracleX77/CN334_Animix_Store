@@ -11,9 +11,8 @@ COPY . .
 # Build the Go app
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o dentistMigrate ./dentists/migrations/dentistMigrate.go
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o patientMigrate ./patient/migrations/patientMigrate.go
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o segmentationMigrate ./segmentation/migrations/segmentationMigrate.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o addressMigrate ./address/migrations/addressMigrate.go
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o userMigrate ./user/migrations/userMigrate.go
 
 
 
@@ -27,17 +26,10 @@ WORKDIR /root/
 
 # Copy the Pre-built binary file from the previous stage
 COPY --from=builder /app/main .
-COPY --from=builder /app/dentistMigrate .
-COPY --from=builder /app/patientMigrate .
-COPY --from=builder /app/segmentationMigrate .
-COPY --from=builder /app/img .
+COPY --from=builder /app/addressMigrate .
+COPY --from=builder /app/userMigrate .
 
-COPY --from=builder /app/entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-EXPOSE 5000
-
-ENTRYPOINT ["entrypoint.sh"]
+EXPOSE 5003
 
 # Command to run the executable
 CMD ["./main"]

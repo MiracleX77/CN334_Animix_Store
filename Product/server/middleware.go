@@ -20,7 +20,7 @@ func TokenAuthentication(repo userRepository.UserRepository, typeUser string) ec
 			}
 			// check if token not start with Bearer
 			if len(authHeader) < 7 || authHeader[:7] != "Bearer " {
-				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+				return c.JSON(http.StatusUnauthorized, "invalid or expired token1")
 			} else {
 				authHeader = authHeader[7:]
 			}
@@ -28,16 +28,16 @@ func TokenAuthentication(repo userRepository.UserRepository, typeUser string) ec
 			tokenUsecase := tokenUsecase.NewTokenUsecaseImpl(configs.GetJwtConfig().SecretKey)
 			userID, err := tokenUsecase.ParseToken(&authHeader)
 			if err != nil {
-				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+				return c.JSON(http.StatusUnauthorized, "invalid or expired token2")
 			}
 			userId := strconv.FormatUint(uint64(*userID), 10)
 			result, err := repo.GetUserDataByKey("id", &userId)
 			if err != nil {
-				return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+				return c.JSON(http.StatusUnauthorized, "invalid or expired token3")
 			}
 			if typeUser == "admin" {
 				if result.Type != "Admin" {
-					return c.JSON(http.StatusUnauthorized, "invalid or expired token")
+					return c.JSON(http.StatusUnauthorized, "invalid or expired token4")
 				}
 			}
 

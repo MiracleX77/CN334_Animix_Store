@@ -1,15 +1,15 @@
 version: '3.8'
 services:
-  frontend:
-    container_name: frontend
-    build: ./Frontend
-    environment:
-      - NODE_ENV=${NODE_ENV}
-    volumes:
-      - ./img:/app/public/img
-    ports:
-      - 3000:3000
-    restart: always
+  # frontend:
+  #   container_name: frontend
+  #   build: ./Frontend
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV}
+  #   volumes:
+  #     - ./img:/app/public/img
+  #   ports:
+  #     - 3000:3000
+  #   restart: always
   postgres:
     image: postgres:latest
     container_name: postgres
@@ -33,27 +33,19 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
-  fastapi-backend:
-    container_name: fastapi-backend
-    build: ./Backend
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - JWT_SECRET=${JWT_SECRET}
+  storage:
+    container_name: storage
+    build: ./Storage
     volumes:
       - ./img:/app/img
     ports:
-      - 8000:80
+      - 8000:8000
     depends_on:
       - postgres
     restart: always
-  golang-backend:
-    container_name: golang-backend
-    build: ./Backend_Go
+  user-backend:
+    container_name: user-service
+    build: ./User
     environment:
       - NODE_ENV=${NODE_ENV}
       - POSTGRES_DB=${POSTGRES_DB}
@@ -64,14 +56,68 @@ services:
       - POSTGRES_PROTOCOL=${POSTGRES_PROTOCOL}
       - POSTGRES_SSL_MODE=${POSTGRES_SSL_MODE}
       - POSTGRES_TIMEZONE=${POSTGRES_TIMEZONE}
-      - ECHO_PORT=${ECHO_PORT}
+      - ECHO_PORT=${ECHO_PORT_USER}
       - JWT_SECRET=${JWT_SECRET}
-    volumes:
-      - ./img:/root/img
     ports:
-      - ${ECHO_PORT}:${ECHO_PORT}
+      - ${ECHO_PORT_USER}:${ECHO_PORT_USER}
     depends_on:
       - postgres
-    restart: always
+  review-backend:
+    container_name: review-service
+    build: ./Review
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PROTOCOL=${POSTGRES_PROTOCOL}
+      - POSTGRES_SSL_MODE=${POSTGRES_SSL_MODE}
+      - POSTGRES_TIMEZONE=${POSTGRES_TIMEZONE}
+      - ECHO_PORT=${ECHO_PORT_REVIEW}
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - ${ECHO_PORT_REVIEW}:${ECHO_PORT_REVIEW}
+    depends_on:
+      - postgres
+  product-backend:
+    container_name: product-service
+    build: ./Product
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PROTOCOL=${POSTGRES_PROTOCOL}
+      - POSTGRES_SSL_MODE=${POSTGRES_SSL_MODE}
+      - POSTGRES_TIMEZONE=${POSTGRES_TIMEZONE}
+      - ECHO_PORT=${ECHO_PORT_PRODUCT}
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - ${ECHO_PORT_PRODUCT}:${ECHO_PORT_PRODUCT}
+    depends_on:
+      - postgres
+  order-backend:
+    container_name: order-service
+    build: ./Order
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PROTOCOL=${POSTGRES_PROTOCOL}
+      - POSTGRES_SSL_MODE=${POSTGRES_SSL_MODE}
+      - POSTGRES_TIMEZONE=${POSTGRES_TIMEZONE}
+      - ECHO_PORT=${ECHO_PORT_ORDER}
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - ${ECHO_PORT_ORDER}:${ECHO_PORT_ORDER}
+    depends_on:
+      - postgres
 volumes:
   postgres_data:
