@@ -35,3 +35,9 @@ type CategoryHandler interface {
 	GetCategoryAll(c echo.Context) error
 	DeleteCategory(c echo.Context) error
 }
+
+type FavoriteHandler interface {
+	InsertFavorite(c echo.Context) error
+	GetFavoriteAllByUserId(c echo.Context) error
+	DeleteFavorite(c echo.Context) error
+}

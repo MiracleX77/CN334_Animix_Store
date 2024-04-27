@@ -67,3 +67,25 @@ type PublisherModel struct {
 type InsertPublisherModel struct {
 	Name string `json:"name" validate:"required"`
 }
+
+type FavoriteModel struct {
+	ID        uint64 `json:"id"`
+	Product   ProductFavoriteModel
+	UserId    uint64 `json:"user_id"`
+	Status    string `json:"status"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type ProductFavoriteModel struct {
+	ID     uint64  `json:"id"`
+	Name   string  `json:"name"`
+	Price  float64 `json:"price"`
+	ImgUrl string  `json:"img_url"`
+}
+
+type InsertFavoriteModel struct {
+	ProductId uint64 `json:"product_id" validate:"required"`
+	UserId    uint64 `json:"user_id" validate:"required"`
+	Status    string `json:"status"`
+}

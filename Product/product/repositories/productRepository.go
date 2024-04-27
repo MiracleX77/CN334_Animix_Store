@@ -35,3 +35,12 @@ type PublisherRepository interface {
 	GetDataAll() ([]*entities.Publisher, error)
 	DeleteData(id *uint64) error
 }
+
+type FavoriteRepository interface {
+	GetDataByKey(key string, value *string) (*entities.Favorite, error)
+	InsertData(in *entities.InsertFavorite) error
+	UpdateData(in *entities.UpdateFavorite, id *uint64) error
+	GetDataAll() ([]*entities.Favorite, error)
+	GetDataAllByKey(key string, value *string) ([]*entities.Favorite, error)
+	DeleteData(id *uint64) error
+}

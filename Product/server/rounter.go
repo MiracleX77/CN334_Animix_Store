@@ -92,6 +92,20 @@ func (s *echoServer) initializeCategoryHttpHandler() {
 
 }
 
+func (s *echoServer) initializeFavoriteHttpHandler() {
+	favoritePosgresRepository := productRepository.NewFavoritePostgresRepository(s.db)
+	favoriteUsecase := productUsecase.NewFavoriteUsecaseImpl(favoritePosgresRepository)
+	favoriteHandler := productHandler.NewFavoriteHttpHandler(favoriteUsecase)
+
+	favoriteRouters := s.app.Group("v1/favorite")
+
+	favoriteRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "user"))
+	favoriteRouters.GET("/", favoriteHandler.GetFavoriteAllByUserId)
+	favoriteRouters.POST("/", favoriteHandler.InsertFavorite)
+	favoriteRouters.DELETE("/:id", favoriteHandler.DeleteFavorite)
+
+}
+
 func authRepositoryForAuth(s *echoServer) authRepository.UserRepository {
 	return authRepository.NewUserPostgresRepository(s.db)
 }

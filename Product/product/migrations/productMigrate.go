@@ -17,4 +17,5 @@ func addressMigrate(db database.Database) {
 	db.GetDb().AutoMigrate(&entities.Publisher{})
 	db.GetDb().AutoMigrate(&entities.Category{})
 	db.GetDb().AutoMigrate(&entities.Product{})
+	db.GetDb().AutoMigrate(&entities.Favorite{})
 }
