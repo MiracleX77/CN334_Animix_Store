@@ -23,7 +23,7 @@ def init():
         parent_directory = os.path.dirname(current_directory)
 
         uploaded_file = file.file.read()
-        output_folder = os.path.join(parent_directory, "Storage/img")
+        output_folder = os.path.join(parent_directory, "app/img")
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         

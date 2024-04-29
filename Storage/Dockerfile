@@ -12,4 +12,3 @@ COPY . .
 
 CMD ["python", "main.py"]
 
-EXPOSE 8000

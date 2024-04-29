@@ -172,7 +172,7 @@ func (u *orderUsecaseImpl) InsertOrder(in *models.InsertOrderModel) error {
 	paymentModels := &paymentEntities.InsertPayment{
 		Type:         in.Type,
 		Total:        in.Total,
-		ProofPayment: "http://127.0.0.1:8000/images/" + in.Img,
+		ProofPayment: "http://127.0.0.1:8001/images/" + in.Img,
 		Status:       "WaitConfirm",
 	}
 	paymentId, err := u.paymentRepository.InsertData(paymentModels)
@@ -234,7 +234,7 @@ func (u *orderUsecaseImpl) DeleteOrder(id *string) error {
 }
 
 func (u *orderUsecaseImpl) SendFileToApi(file io.Reader, filename string) error {
-	url := "http://127.0.0.1:8000/upload" // Endpoint to which you want to send the file
+	url := "http://storage:8000/upload" // Endpoint to which you want to send the file
 
 	// Creating a multipart/form-data body
 	body := &bytes.Buffer{}

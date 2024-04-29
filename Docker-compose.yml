@@ -22,6 +22,8 @@ services:
     ports:
       - 5432:${POSTGRES_PORT}
     restart: unless-stopped
+    networks:
+      - app-network
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin
@@ -39,10 +41,12 @@ services:
     volumes:
       - ./img:/app/img
     ports:
-      - 8000:8000
+      - 8001:8000
     depends_on:
       - postgres
     restart: always
+    networks:
+      - app-network
   user-backend:
     container_name: user-service
     build: ./User
@@ -62,6 +66,8 @@ services:
       - ${ECHO_PORT_USER}:${ECHO_PORT_USER}
     depends_on:
       - postgres
+    networks:
+      - app-network
   review-backend:
     container_name: review-service
     build: ./Review
@@ -81,6 +87,8 @@ services:
       - ${ECHO_PORT_REVIEW}:${ECHO_PORT_REVIEW}
     depends_on:
       - postgres
+    networks:
+      - app-network
   product-backend:
     container_name: product-service
     build: ./Product
@@ -100,6 +108,8 @@ services:
       - ${ECHO_PORT_PRODUCT}:${ECHO_PORT_PRODUCT}
     depends_on:
       - postgres
+    networks:
+      - app-network
   order-backend:
     container_name: order-service
     build: ./Order
@@ -119,5 +129,10 @@ services:
       - ${ECHO_PORT_ORDER}:${ECHO_PORT_ORDER}
     depends_on:
       - postgres
+    networks:
+      - app-network
 volumes:
   postgres_data:
+networks:
+  app-network:
+    driver: bridge

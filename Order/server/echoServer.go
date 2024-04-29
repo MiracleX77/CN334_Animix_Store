@@ -26,6 +26,11 @@ func NewEchoServer(cfg *configs.Config, db *gorm.DB) Server {
 }
 
 func (s *echoServer) Start() {
+	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"}, // Allow all origins
+		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE, echo.OPTIONS},
+		AllowHeaders: []string{"*"},
+	}))
 	// initialize routers here
 	s.initializeRouters()
 	s.app.Validator = NewCustomValidator()

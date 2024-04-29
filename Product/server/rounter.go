@@ -13,6 +13,7 @@ func (s *echoServer) initializeRouters() {
 	s.initializeAuthorHttpHandler()
 	s.initializePublisherHttpHandler()
 	s.initializeCategoryHttpHandler()
+	s.initializeFavoriteHttpHandler()
 
 }
 
@@ -22,7 +23,6 @@ func (s *echoServer) initializeProductHttpHandler() {
 	productHandler := productHandler.NewProductHttpHandler(productUsecase)
 
 	productRouters := s.app.Group("v1/product")
-	productRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "user"))
 	productRouters.GET("/:id", productHandler.GetProductById)
 	productRouters.GET("/", productHandler.GetProductAll)
 	productRouters.GET("/category/:id", productHandler.GetProductAllByCategory)
@@ -31,7 +31,7 @@ func (s *echoServer) initializeProductHttpHandler() {
 	adminRouters := s.app.Group("v1/product")
 	adminRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "admin"))
 	adminRouters.POST("/", productHandler.InsertProduct)
-	adminRouters.PUT("/", productHandler.UpdateProduct)
+	adminRouters.PUT("/:id", productHandler.UpdateProduct)
 	adminRouters.DELETE("/:id", productHandler.DeleteProduct)
 
 }

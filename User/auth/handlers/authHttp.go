@@ -25,47 +25,47 @@ func (h *authHttpHandler) Register(c echo.Context) error {
 	reqBody := new(models.RegisterData)
 	if err := c.Bind(reqBody); err != nil {
 		log.Errorf("Error binding request body: %v", err)
-		return response(c, http.StatusBadRequest, "Bad request")
+		return response(c, http.StatusBadRequest, "Bad request", nil)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		log.Errorf("Error validating request body: %v", err)
-		return response(c, http.StatusBadRequest, "Bad request")
+		return response(c, http.StatusBadRequest, "Bad request", nil)
 	}
 	if err := h.authUsecase.CheckData(reqBody); err != nil {
 		log.Errorf("Error validating request body: %v", err)
 		if _, ok := err.(*authError.ServerInternalError); ok {
-			return response(c, http.StatusInternalServerError, "Server Internal Error")
+			return response(c, http.StatusInternalServerError, "Server Internal Error", nil)
 		} else {
-			return response(c, http.StatusBadRequest, err.Error())
+			return response(c, http.StatusBadRequest, err.Error(), nil)
 		}
 	}
 	if err := h.authUsecase.RegisterDataProcessing(reqBody); err != nil {
-		return response(c, http.StatusInternalServerError, "Processing Data failed")
+		return response(c, http.StatusInternalServerError, "Processing Data failed", nil)
 	}
 
-	return response(c, http.StatusOK, "Success")
+	return response(c, http.StatusOK, "Success", nil)
 }
 
 func (h *authHttpHandler) Login(c echo.Context) error {
 	reqBody := new(models.LoginData)
 	if err := c.Bind(reqBody); err != nil {
 		log.Errorf("Error binding request body: %v", err)
-		return response(c, http.StatusBadRequest, "Bad request")
+		return response(c, http.StatusBadRequest, "Bad request", nil)
 	}
 	if err := c.Validate(reqBody); err != nil {
 		log.Errorf("Error validating request body: %v", err)
-		return response(c, http.StatusBadRequest, "Bad request")
+		return response(c, http.StatusBadRequest, "Bad request", nil)
 	}
 
-	if token, err := h.authUsecase.LoginDataProcession(reqBody); err != nil {
-		log.Errorf("Error validating request body: %v", err)
+	token, err := h.authUsecase.LoginDataProcession(reqBody)
+	if err != nil {
+		log.Errorf("Error login: %v", err)
 		if _, ok := err.(*authError.ServerInternalError); ok {
-			return response(c, http.StatusInternalServerError, "Server Internal Error")
+			return response(c, http.StatusInternalServerError, "Server Internal Error", nil)
 		} else {
-			return response(c, http.StatusBadRequest, err.Error())
+			return response(c, http.StatusBadRequest, err.Error(), nil)
 		}
-	} else {
-		return response(c, http.StatusOK, *token)
 	}
+	return response(c, http.StatusOK, "Success", token)
 
 }

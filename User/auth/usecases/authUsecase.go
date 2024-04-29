@@ -15,7 +15,7 @@ import (
 type AuthUsecase interface {
 	RegisterDataProcessing(in *models.RegisterData) error
 	CheckData(in *models.RegisterData) error
-	LoginDataProcession(in *models.LoginData) (*string, error)
+	LoginDataProcession(in *models.LoginData) (*models.ResponseLogin, error)
 }
 
 type authUsecaseImpl struct {
@@ -64,7 +64,7 @@ func (u *authUsecaseImpl) RegisterDataProcessing(in *models.RegisterData) error 
 	return nil
 }
 
-func (u *authUsecaseImpl) LoginDataProcession(in *models.LoginData) (*string, error) {
+func (u *authUsecaseImpl) LoginDataProcession(in *models.LoginData) (*models.ResponseLogin, error) {
 	username := &in.Username
 	password := &in.Password
 	//result = true -> found username
@@ -91,7 +91,11 @@ func (u *authUsecaseImpl) LoginDataProcession(in *models.LoginData) (*string, er
 			if err != nil {
 				return nil, &authError.ServerInternalError{Err: err}
 			}
-			return token, nil
+			response := &models.ResponseLogin{
+				Role:  user.Type,
+				Token: *token,
+			}
+			return response, nil
 		}
 	}
 }

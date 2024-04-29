@@ -14,7 +14,6 @@ type InsertProductModel struct {
 }
 
 type UpdateProductModel struct {
-	ID          uint64  `json:"id" validate:"required" `
 	AuthorId    uint64  `json:"author_id" validate:"required"`
 	CategoryId  uint64  `json:"category_id" validate:"required"`
 	PublisherId uint64  `json:"publisher_id" validate:"required"`
@@ -22,7 +21,7 @@ type UpdateProductModel struct {
 	Description *string `json:"description"`
 	Price       float64 `json:"price" validate:"required"`
 	Stock       int     `json:"stock" validate:"required"`
-	Img         string  `json:"img" validate:"required"`
+	Img         string  `json:"img" `
 }
 
 type ProductModel struct {

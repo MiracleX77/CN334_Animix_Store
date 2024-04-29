@@ -171,7 +171,7 @@ func (u *productUsecaseImpl) InsertProduct(in *models.InsertProductModel) error 
 		Description: in.Description,
 		Price:       in.Price,
 		Stock:       in.Stock,
-		ImgUrl:      "http://127.0.0.1:8000/images/" + in.Img,
+		ImgUrl:      "http://127.0.0.1:8001/images/" + in.Img,
 		Status:      "active",
 	}
 
@@ -195,7 +195,7 @@ func (u *productUsecaseImpl) UpdateProduct(in *models.UpdateProductModel, id *st
 		Description: in.Description,
 		Price:       in.Price,
 		Stock:       in.Stock,
-		ImgUrl:      "http://127.0.0.1:8000/images/" + in.Img,
+		ImgUrl:      in.Img,
 		Status:      "active",
 	}
 	if err := u.productRepository.UpdateData(productUpdate, &idUint64); err != nil {
@@ -216,7 +216,7 @@ func (u *productUsecaseImpl) DeleteProduct(id *string) error {
 }
 
 func (u *productUsecaseImpl) SendFileToApi(file io.Reader, filename string) error {
-	url := "http://127.0.0.1:8000/upload" // Endpoint to which you want to send the file
+	url := "http://storage:8000/upload" // Endpoint to which you want to send the file
 
 	// Creating a multipart/form-data body
 	body := &bytes.Buffer{}
