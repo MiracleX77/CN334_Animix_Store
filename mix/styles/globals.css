@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Name: custom color palette
+       Author: Ilias Ism
+       URL: https://gradient.page */
+
+    /* CSS: .bg-gradient { background: var(--gradient) } */
+    --gradient: #004FF9;
+
+    --background: 235 65% 3.92%;
+    --foreground: 235 10% 97.45%;
+
+    --muted: 235 50% 14.7%;
+    --muted-foreground: 235 10% 54.9%;
+
+    --popover: 235 45% 6.37%;
+    --popover-foreground: 235 10% 97.45%;
+
+    --card: 235 45% 6.37%;
+    --card-foreground: 235 10% 97.45%;
+
+    --border: 235 50% 14.7%;
+    --input: 235 50% 14.7%;
+
+    --primary: 235 100% 49%;
+    --primary-foreground: 235 10% 4.9%;
+
+    --secondary: 235 50% 14.7%;
+    --secondary-foreground: 235 10% 97.45%;
+
+    --accent: 235 50% 14.7%;
+    --accent-foreground: 235 10% 97.45%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 235 10% 97.45%;
+
+    --ring: 235 100% 49%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .shadow-neon {
+    box-shadow: 0 0 2px 2px rgba(115, 249, 232, 0.2), 0 0 2px 2px rgba(59, 131, 253, 0.3), 0 0 5px 5px rgba(90, 195, 241, 0.7) inset;
+  }
+}
