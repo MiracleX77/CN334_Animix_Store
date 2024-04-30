@@ -35,6 +35,9 @@ func (s *echoServer) initializeUserHttpHandler() {
 	userUsecase := userUsecase.NewUserUsecaseImpl(userPosgresRepository)
 	userHttpHandler := userHandler.NewUserHttpHandler(userUsecase)
 
+	uRouters := s.app.Group("v1/user")
+	uRouters.GET("/:id", userHttpHandler.GetUserByUserId)
+
 	userRouters := s.app.Group("v1/user")
 
 	userRouters.Use(TokenAuthentication(userRepositoryForAuth(s), "user"))

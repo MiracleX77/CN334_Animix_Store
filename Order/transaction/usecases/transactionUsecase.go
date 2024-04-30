@@ -30,7 +30,7 @@ func (u *transactionUsecaseImpl) GetTransactionById(id *string, token *string) (
 	}
 	productModel := &models.ProductModel{}
 	productId := strconv.Itoa(transactionData.ProductId)
-	if err := getDataFormAPI("5002", "product", productId, productModel, *token); err != nil {
+	if err := getDataFormAPI("5002", "product", "product", productId, productModel, *token); err != nil {
 		return nil, &transactionError.ServerInternalError{Err: err}
 	}
 
@@ -56,7 +56,7 @@ func (u *transactionUsecaseImpl) GetTransactionAllByOrderId(id *string, token *s
 
 		productModel := &models.ProductModel{}
 		productId := strconv.Itoa(transaction.ProductId)
-		if err := getDataFormAPI("5002", "product", productId, productModel, *token); err != nil {
+		if err := getDataFormAPI("5002", "product", "product", productId, productModel, *token); err != nil {
 			return nil, &transactionError.ServerInternalError{Err: err}
 		}
 

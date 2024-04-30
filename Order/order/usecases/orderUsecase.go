@@ -75,7 +75,7 @@ func (u *orderUsecaseImpl) GetOrderById(id *string, token *string) (*models.Orde
 	}
 	addressModel := &deliveryModels.AddressModel{}
 	addressId := strconv.Itoa(delivery.AddressId)
-	if err := getDataFormAPI("5003", "address", addressId, addressModel, *token); err != nil {
+	if err := getDataFormAPI("5003", "user", "address", addressId, addressModel, *token); err != nil {
 		return nil, &orderError.ServerInternalError{Err: err}
 	}
 	deliveryModel := &deliveryModels.DeliveryModel{

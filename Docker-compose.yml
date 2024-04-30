@@ -35,6 +35,8 @@ services:
     depends_on:
       - postgres
     restart: unless-stopped
+    networks:
+      - app-network
   storage:
     container_name: storage
     build: ./Storage

@@ -7,12 +7,11 @@ export default function ProductPage() {
     const params = useParams<{ product: string }>()
     return (
         <>
-            {params.product}
-            <div className="w-full p-4">
+            <div className="mx-auto w-[80%] shadow-neon">
 
-                <div className="p-4 ring-4 rounded-xl">
+                <div className="p-4  rounded-xl">
                     <ProductComponent id={params.product} />
-                    <ProductFooter />
+                    <ProductFooter id={params.product} />
                 </div>
 
             </div>

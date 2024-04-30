@@ -21,14 +21,25 @@ type UpdateReviewModel struct {
 }
 
 type ReviewModel struct {
-	ID        uint64
-	UserId    uint64
-	ProductId uint64
-	Title     string
-	Content   string
-	Rating    int
-	Polarity  string
-	Status    string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uint64    `json:"id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	ProductId uint64    `json:"product_id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Rating    int       `json:"rating"`
+	Polarity  string    `json:"polarity"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type UserModel struct {
+	ID        uint64    `json:"user_id"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_on"`
+	Status    string    `json:"status"`
 }

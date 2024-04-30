@@ -40,7 +40,27 @@ func (h *userHttpHandler) GetUserById(c echo.Context) error {
 	}
 	return response(c, 200, "Success", user)
 }
-
+func (h *userHttpHandler) GetUserByUserId(c echo.Context) error {
+	userId := c.Param("id")
+	if err := h.userUsecase.CheckUserId(&userId); err != nil {
+		log.Errorf("Error validating request body: %v", err)
+		if _, ok := err.(*userError.ServerInternalError); ok {
+			return response(c, 500, "Server Internal Error", nil)
+		} else {
+			return response(c, 400, err.Error(), nil)
+		}
+	}
+	user, err := h.userUsecase.GetUserById(&userId)
+	if err != nil {
+		log.Errorf("Error getting dentist by id: %v", err)
+		if _, ok := err.(*userError.ServerInternalError); ok {
+			return response(c, 500, "Server Internal Error", nil)
+		} else {
+			return response(c, 400, err.Error(), nil)
+		}
+	}
+	return response(c, 200, "Success", user)
+}
 func (h *userHttpHandler) GetUserAll(c echo.Context) error {
 	users, err := h.userUsecase.GetUserAll()
 	if err != nil {

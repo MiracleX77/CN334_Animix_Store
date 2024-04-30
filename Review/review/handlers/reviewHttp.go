@@ -46,7 +46,8 @@ func (h *reviewHttpHandler) GetReviewById(c echo.Context) error {
 
 func (h *reviewHttpHandler) GetReviewByUserId(c echo.Context) error {
 	userId := c.Get("userId").(string)
-	reviews, err := h.reviewUsecase.GetReviewByKey("user_id", userId)
+	token := c.Get("token").(string)
+	reviews, err := h.reviewUsecase.GetReviewAllByUserId(userId, token)
 	if err != nil {
 		log.Errorf("Error getting review by user id: %v", err)
 		if _, ok := err.(*reviewError.ServerInternalError); ok {

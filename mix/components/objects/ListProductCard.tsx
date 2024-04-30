@@ -32,6 +32,7 @@ export default function ListProductCard({ type }: props) {
             {
                 const fetchedProducts = await getProductsByCategory('3');
                 const product = fetchedProducts.data.data
+                
                 setProducts(product);
             } else if (type === 'Light Novel')
             {
@@ -48,7 +49,7 @@ export default function ListProductCard({ type }: props) {
 
     return (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7">
                 {products.map((product, index) => (
                     <ProductCard key={index} product={product} />
                 ))}

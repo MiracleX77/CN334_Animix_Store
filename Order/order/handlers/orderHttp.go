@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	orderError "github.com/MiracleX77/CN334_Animix_Store/order/errors"
 	"github.com/MiracleX77/CN334_Animix_Store/order/models"
@@ -93,13 +95,16 @@ func (h *orderHttpHandler) InsertOrder(c echo.Context) error {
 	// สมมติว่าคุณต้องการรับ array ของ product ID จากฟิลด์ 'list_product_id[]'
 	listProductIds := []uint64{}
 	listProductStrs := c.Request().PostForm["list_product_id"] // ใช้ PostForm เพื่อรับ slice ของค่า
+	fmt.Println(listProductStrs)
 	for _, strID := range listProductStrs {
-		id, err := strconv.ParseUint(strID, 10, 64)
-		if err != nil {
-			// จัดการ error ที่นี่, ตัวอย่างเช่น return error response
-			return response(c, 400, "Invalid product ID", nil)
+		ids := strings.Split(strID, ",")
+		for _, strID := range ids {
+			id, err := strconv.ParseUint(strID, 10, 64)
+			if err != nil {
+				return response(c, 400, "Invalid product ID", nil)
+			}
+			listProductIds = append(listProductIds, id)
 		}
-		listProductIds = append(listProductIds, id)
 	}
 	reqBody := new(models.InsertOrderModel)
 	reqBody.UserId, _ = strconv.ParseUint(userId, 10, 64)

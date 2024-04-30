@@ -16,16 +16,17 @@ func (s *echoServer) initializeReviewHttpHandler() {
 	reviewPosgresRepository := reviewRepository.NewReviewPostgresRepository(s.db)
 	reviewUsecase := reviewUsecase.NewReviewUsecaseImpl(reviewPosgresRepository)
 	reviewHandler := reviewHandler.NewReviewHttpHandler(reviewUsecase)
-
 	reviewRouters := s.app.Group("v1/review")
 
-	reviewRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "user"))
-	reviewRouters.GET("/:id", reviewHandler.GetReviewById)
-	reviewRouters.GET("/user/:id", reviewHandler.GetReviewByUserId)
 	reviewRouters.GET("/product/:id", reviewHandler.GetReviewByProductId)
-	reviewRouters.POST("/", reviewHandler.InsertReview)
-	reviewRouters.PUT("/:id", reviewHandler.UpdateReview)
-	reviewRouters.DELETE("/:id", reviewHandler.DeleteReview)
+	reviewAuthRouters := s.app.Group("v1/review")
+
+	reviewAuthRouters.Use(TokenAuthentication(authRepositoryForAuth(s), "user"))
+	reviewAuthRouters.GET("/:id", reviewHandler.GetReviewById)
+	reviewAuthRouters.GET("/user/:id", reviewHandler.GetReviewByUserId)
+	reviewAuthRouters.POST("/", reviewHandler.InsertReview)
+	reviewAuthRouters.PUT("/:id", reviewHandler.UpdateReview)
+	reviewAuthRouters.DELETE("/:id", reviewHandler.DeleteReview)
 
 }
 

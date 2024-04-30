@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/MiracleX77/CN334_Animix_Store/review/entities"
@@ -16,6 +17,7 @@ type ReviewUsecase interface {
 	CheckReviewId(id *string) error
 	GetReviewByKey(key string, value string) ([]*models.ReviewModel, error)
 	DeleteReview(id *string) error
+	GetReviewAllByUserId(id string, token string) ([]*models.ReviewModel, error)
 }
 
 type reviewUsecaseImpl struct {
@@ -43,10 +45,16 @@ func (u *reviewUsecaseImpl) GetReviewById(id *string, token *string) (*models.Re
 	if err != nil {
 		return nil, err
 	}
+	userModel := &models.UserModel{}
+	userId := strconv.Itoa(reviewData.UserId)
+	if err = getDataFormAPI("5003", "user", userId, userModel, *token); err != nil {
+		return nil, &reviewError.ServerInternalError{Err: err}
+	}
 
 	reviewModel := &models.ReviewModel{
 		ID:        uint64(reviewData.ID),
-		UserId:    uint64(reviewData.UserId),
+		FirstName: userModel.FirstName,
+		LastName:  userModel.LastName,
 		ProductId: uint64(reviewData.ProductId),
 		Title:     reviewData.Title,
 		Content:   reviewData.Content,
@@ -60,16 +68,23 @@ func (u *reviewUsecaseImpl) GetReviewById(id *string, token *string) (*models.Re
 	return reviewModel, nil
 }
 
-func (u *reviewUsecaseImpl) GetReviewAllByUserId() ([]*models.ReviewModel, error) {
-	reviews, err := u.reviewRepository.GetDataAll()
+func (u *reviewUsecaseImpl) GetReviewAllByUserId(id string, token string) ([]*models.ReviewModel, error) {
+	reviews, err := u.reviewRepository.GetDataAllByKey("user_id", &id)
 	if err != nil {
 		return nil, err
 	}
+	userModel := &models.UserModel{}
+	userId := strconv.Itoa(reviews[0].UserId)
+	if err = getDataFormAPI("5003", "user", userId, userModel, token); err != nil {
+		return nil, &reviewError.ServerInternalError{Err: err}
+	}
+
 	reviewModels := []*models.ReviewModel{}
 	for _, review := range reviews {
 		reviewModel := &models.ReviewModel{
 			ID:        uint64(review.ID),
-			UserId:    uint64(review.UserId),
+			FirstName: userModel.FirstName,
+			LastName:  userModel.LastName,
 			ProductId: uint64(review.ProductId),
 			Title:     review.Title,
 			Content:   review.Content,
@@ -90,9 +105,15 @@ func (u *reviewUsecaseImpl) GetReviewByKey(key string, value string) ([]*models.
 	}
 	reviewModels := []*models.ReviewModel{}
 	for _, review := range reviews {
+		userModel := &models.UserModel{}
+		userId := strconv.Itoa(review.UserId)
+		if err = getDataFormAPI("5003", "user", userId, userModel, ""); err != nil {
+			return nil, &reviewError.ServerInternalError{Err: err}
+		}
 		reviewModel := &models.ReviewModel{
 			ID:        uint64(review.ID),
-			UserId:    uint64(review.UserId),
+			FirstName: userModel.FirstName,
+			LastName:  userModel.LastName,
 			ProductId: uint64(review.ProductId),
 			Title:     review.Title,
 			Content:   review.Content,
@@ -109,10 +130,12 @@ func (u *reviewUsecaseImpl) GetReviewByKey(key string, value string) ([]*models.
 
 func (u *reviewUsecaseImpl) InsertReview(in *models.InsertReviewModel) error {
 
-	polarity, err := getDataFormAPI(in.Content)
+	polarity, err := getAiDataFormAPI(in.Content)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(polarity)
 
 	reviewInsert := &entities.InsertReview{
 		UserId:    int(in.UserId),
@@ -138,7 +161,7 @@ func (u *reviewUsecaseImpl) UpdateReview(in *models.UpdateReviewModel, id *strin
 	if err != nil {
 		return &reviewError.ServerInternalError{Err: err}
 	}
-	polarity, err := getDataFormAPI(in.Content)
+	polarity, err := getAiDataFormAPI(in.Content)
 	if err != nil {
 		return err
 	}

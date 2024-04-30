@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func getDataFormAPI(port string, typeData string, Id string, out interface{}, token string) error {
-	url := "http://localhost:" + port + "/v1/" + typeData + "/" + Id
+func getDataFormAPI(port string, typeService string, typeData string, Id string, out interface{}, token string) error {
+	url := "http://" + typeService + "-service:" + port + "/v1/" + typeData + "/" + Id
 
 	// Create the request
 	req, err := http.NewRequest("GET", url, nil)

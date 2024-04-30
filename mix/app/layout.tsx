@@ -32,11 +32,15 @@ export default function RootLayout({
   const pathname = usePathname();
   const [isAuthPage, setIsAuthPage] = useState(false);
   const [isAdminPage, setIsAdminPage] = useState(false);
+  const [isCartPage, setIsCartPage] = useState(false);
+  const [isProfilePage, setIsProfilePage] = useState(false);
 
 
   useEffect(() => {
     setIsAuthPage(pathname.includes('/auth'));
     setIsAdminPage(pathname.includes('/dashboard'));
+    setIsCartPage(pathname.includes('/cart'));
+    setIsProfilePage(pathname.includes('/profile'));
   }, [pathname]);
 
 
@@ -45,7 +49,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width/2, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" />
         <link rel="icon" href="http://localhost:3000/logo.png" sizes='any' />
 
@@ -59,40 +63,39 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {
-              !isAuthPage  && (
-                <header className="fixed z-[999] w-full min-h-[70px]">
-                  <NavigationBar />
-                </header>
-              )
+            <div className="max-w-[1240px] mx-auto w-full">
+              {
+                !isAuthPage  && (
+                  <header className="fixed z-[999] w-full min-h-[70px]">
+                    <div className="max-w-[1240px] ">
+                      <NavigationBar />
+                    </div>
+                  </header>
+                )
+              }
 
-            }
+              <main className={`w-full ${!isAuthPage} pt-[70px] h-full`}>
+                <div className="h-full w-full">
+                  {
+                    !isAuthPage && !isAdminPage && !isCartPage && !isProfilePage&&(<div className="p-4">
+                      <Category />
+                    </div>
+                    )
+                  }
 
-            
-            <main className={`w-full ${!isAuthPage} pt-[70px] h-full`}>
-              <div className="h-full w-full">
-                {
-                  !isAuthPage && !isAdminPage && (<div className="p-4">
-                    <Category />
-                  </div>
-                  )
-                }
-
-
-                <div className="w-full h-full">{children}</div>
-              </div>
-            
-            </main>
-            {
-              !isAuthPage && !isAdminPage &&(
-                <footer className="z-[999] w-full h-max bg-card border-t mt-20">
-                  <div className="w-full h-full px-16">
-                    <Footertail />
-                  </div>
-                </footer>
-              )
-            }
-
+                  <div className="w-full h-full">{children}</div>
+                </div>
+              </main>
+              {
+                !isAuthPage && !isAdminPage && (
+                  <footer className="z-[999] w-full h-max bg-card border-t mt-20">
+                    <div className="w-full h-full px-16">
+                      <Footertail />
+                    </div>
+                  </footer>
+                )
+              }
+            </div>
 
 
           </ThemeProvider>

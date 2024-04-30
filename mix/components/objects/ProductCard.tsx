@@ -15,13 +15,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Middle from "../layouts/Middle"
 import Span from "../layouts/Span"
+import { useRouter } from "next/navigation"
+import Cookies from "js-cookie"
+import AlertDialog from "../interactive/layout/alertdialog"
 
 export interface ProductCard {
+    id: string
     img_url: string;
     name: string
     description?: string
     price: number
-    onClick?: () => void
     new?: boolean
     hot?: boolean
     sale?: number
@@ -32,27 +35,55 @@ type props = {
 }
 
 export function ProductCard({ product }: props) {
+    const router = useRouter();
     
-    const [hover, setHover] = useState(false)
+    const [openAlert, setOpenAlert] = useState(false);
+    const [alertTitle, setAlertTitle] = useState('');
+    const [alertContent, setAlertContent] = useState('');
+    const [alertConfirmText, setAlertConfirmText] = useState('');
+    const [alertOnConfirm, setAlertOnConfirm] = useState(() => () => console.log("default ooops"));
+    const [alertStatus, setAlertStatus] = useState('');
+    
+    const handleAddToCart = () => {
+        console.log("Add to cart");
+        let cart = Cookies.get("cart");
+        let cartIds: string[] = cart ? JSON.parse(cart) : [];
+        cartIds.push(product.id);
+        Cookies.set("cart", JSON.stringify(cartIds), { expires: 7 });  
+        console.log(`Product ID ${product.id} added to cart`);
+        setAlertTitle("Add to Cart");
+        setAlertContent("Product added to cart successfully");
+        setAlertConfirmText("OK");
+        setAlertStatus("success");
+        setAlertOnConfirm(() => () => setOpenAlert(false));
+        setOpenAlert(true);
+    }
+    const handleViewDetail = () => {
+        console.log("View detail");
+        router.push(`/product/${product.id}`);
+    }
 
     return (
         <>
-            <Card className="w-[120px] sm:w-[150px] md:w-[200px] 2xl:w-[300px] p-2 pb-0 cursor-pointer shadow-lg rounded-xl ring-4"
-                onClick={() => setHover(true)}
+            <Card className="h-[350px] w-[100px] sm:w-[130px] md:w-[170px] 2xl:w-[210px] p-2 pb-0 cursor-pointer shadow-lg rounded-xl ring-4"
             >
-                <div className="relative overflow-hidden rounded-xl">
-                    <img src={product.img_url} alt="Product" width={360} height={360} className="rounded-lg h-[200px] sm:h-[240px] md:h-[300px] 2xl:h-[360px] hover:scale-110 animate" />
+                <div onClick={handleViewDetail} className="relative overflow-hidden rounded-xl" >
+                    <img src={product.img_url} alt="Product" width={300} height={300} className="rounded-lg h-[200px] sm:h-[240px] md:h-[300px] 2xl:h-[250px] hover:scale-110 animate" />
                 </div>
                 <div className="flex justify-between mt-2 p-2 gap-4">
-                    <div className="w-full">
-                        <CardTitle>{product.name}</CardTitle>
-                        <CardDescription>
-                            <p className="text-lg md:text-xl text-green-500 text-right">฿ {product.price}</p>
-                        </CardDescription>
+                    <div onClick={handleViewDetail} className="w-full">
+                        <CardTitle className="text-[15px]">{product.name}</CardTitle>
+       
                     </div>
-                    <Button className="bg-secondary ring-2 px-4 rounded-xl text-white">
-                        Add
-                    </Button>
+                    <AlertDialog open={openAlert} setOpen={setOpenAlert} title={alertTitle} content={alertContent} status={alertStatus} onConfirm={alertOnConfirm} confirmText={alertConfirmText} cancelBottom={false}/>
+                    <div>
+                        <Span className="text-lg text-green-600">
+                            {product.price} ฿
+                        </Span>
+                        <Button onClick={handleAddToCart} className="bg-secondary ring-2 px-4 rounded-xl text-white">
+                            Add
+                        </Button>
+                    </div>
                 </div>
             </Card>
         </>

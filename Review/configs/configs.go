@@ -34,13 +34,13 @@ type (
 // KEY=VALUE format and automatically load environment variables.
 func init() {
 
-	// 	viper.SetConfigFile("D:/Documents/Github/CN334_Animix_Store/review/.env")
-	// 	viper.SetConfigType("env") // If your .env file has KEY=VALUE format
-	// 	err := viper.ReadInConfig()
-	// 	if err != nil {
-	// 		log.Fatalf("Error reading .env file, %s", err)
-	// 	}
-	// 	viper.AutomaticEnv()
+	// viper.SetConfigFile("D:/Documents/Github/CN334_Animix_Store/review/.env")
+	// viper.SetConfigType("env") // If your .env file has KEY=VALUE format
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	log.Fatalf("Error reading .env file, %s", err)
+	// }
+	// viper.AutomaticEnv()
 }
 
 func GetConfig() Config {

@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
     const accessControl = {
         '/dashboard': ['Admin'],  // All subpaths in dashboard require Admin role
         '/dashboard/user': ['User', 'Admin'],  // Specific override for this path
+        '/cart': ['User', 'Admin'],  // All subpaths in cart require User or Admin role
     };
 
     if (!token || !role) {

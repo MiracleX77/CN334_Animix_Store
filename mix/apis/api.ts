@@ -91,14 +91,19 @@ export async function get(url: string,type: string,service:string, params?: any,
 }
 
 export async function post(url: string,type: string,service:string, data?: any, token?: string) {
-    const formData = new FormData();
-    for (const key in data) {
-        if (data.hasOwnProperty(key)) {
-            formData.append(key, data[key]);
+    if (type == 'json'){
+        const config = getRequestConfig('post', url,type,service, data, token);
+        return sendRequest(config);
+    } else {
+        const formData = new FormData();
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                formData.append(key, data[key]);
+            }
         }
+        const config = getRequestConfig('post', url,type,service, formData, token);
+        return sendRequest(config);
     }
-    const config = getRequestConfig('post', url,type,service, formData, token);
-    return sendRequest(config);
 }
 
 // export async function postForm(url: string, data?: any, token: string | null = '') {

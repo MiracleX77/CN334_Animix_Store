@@ -52,7 +52,7 @@ func (r *reviewPosgresRepository) GetDataAll() ([]*entities.Review, error) {
 
 func (r *reviewPosgresRepository) GetDataAllByKey(key string, value *string) ([]*entities.Review, error) {
 	datas := []*entities.Review{}
-	result := r.db.Preload("Delivery").Preload("Payment").Where(key+"= ?", *value).Where("status <> ?", "Removed").Find(&datas)
+	result := r.db.Where(key+"= ?", *value).Where("status <> ?", "Removed").Find(&datas)
 	if result.Error != nil {
 		return nil, &reviewError.ServerInternalError{Err: result.Error}
 	}

@@ -212,11 +212,11 @@ export default function CardAdd() {
             cancelBottom={alertCancelBottom}
             />
             <Card>
-    <CardHeader>
-        <CardTitle>Add Product</CardTitle>
-        <CardDescription>Edit the product details</CardDescription>
-    </CardHeader>
-    <CardContent>
+            <CardHeader>
+                <CardTitle>Add Product</CardTitle>
+                <CardDescription>Edit the product details</CardDescription>
+            </CardHeader>
+            <CardContent>
         <form onSubmit={handleSubmit} className="grid grid-cols-4 gap-4">
             {/* File input and Image preview occupying the first column and spanning 2 rows */}
             <div className="flex flex-col col-span-1 row-span-4">
